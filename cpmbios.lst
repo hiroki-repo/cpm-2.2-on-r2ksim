@@ -1,0 +1,701 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 1.
+Hexadecimal [16-Bits]
+
+
+
+                              1 .r2k
+                              2 .area TEST(ABS)
+                              3 
+                              4 ;;Global Control/Status Register
+                     0000     5 GCSR	.equ	0x00
+                              6 ;;Global Output Control Register
+                     000E     7 GOCR	.equ	0x0e
+                              8 ;;MMU: Memory Bank 0 Control Ragister
+                     0014     9 MB0CR	.equ	0x14
+                             10 ;;MMU: Memory Bank 1 Control Ragister
+                     0015    11 MB1CR	.equ	0x15
+                             12 ;;MMU: MMU Instruction/Data Register
+                     0010    13 MMIDR	.equ	0x10
+                             14 ;;MMU: Data Segment Register(Z180 BBR)
+                     0012    15 DATASEG	.equ	0x12
+                             16 ;;MMU: Segment Size Register(Z180 CBAR)
+                     0013    17 SEGSIZE	.equ	0x13
+                             18 ;;MMU: Stack Segment Register(Z180 CBR)
+                     0011    19 STACKSEG	.equ	0x11
+                             20 
+                             21 
+                             22 ;;Parallel ports 
+                             23 ;;PPC
+                             24 ;;Port C Data Ragister
+                     0050    25 PCDR	.equ	0x50
+                             26 ;;Port C Function Ragister
+                     0055    27 PCFR	.equ	0x55
+                             28 
+                             29 
+                             30 ;;Timer A
+                             31 ;;Timer A Control/Status Register
+                     00A0    32 TACSR	.equ	0xa0
+                             33 ;;Timer A Control Register
+                     00A4    34 TACR	.equ	0xa4
+                             35 ;;Timer A1 Constant register
+                     00A3    36 TAT1R	.equ	0xA3
+                             37 ;;Timer A4 Constant register
+                     00A9    38 TAT4R	.equ	0xA9
+                             39 
+                             40 ;;Serial A port
+                             41 ;;Serial A Port Status Register
+                     00C3    42 SASR	.equ	0xc3
+                             43 ;;Serial A port Control Register
+                     00C4    44 SACR	.equ	0xc4
+                             45 ;;Serial A port Data Register
+                     00C0    46 SADR	.equ	0xc0
+                             47 ;;Serial A port Long Register
+                     00C2    48 SALR	.equ	0xc2
+                             49 
+   F200                      50 .org 0xf200
+   F200 C3 E2 F2             51 boot:	 jp biosboot 
+   F203 C3 53 F3             52 wboot:	 jp bioswboot 
+   F206 C3 74 F3             53 const:	 jp biosconst 
+   F209 C3 C5 F3             54 conin:	 jp biosconin 
+   F20C C3 0B F4             55 conout:	 jp biosconout 
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 2.
+Hexadecimal [16-Bits]
+
+
+
+   F20F C3 52 F4             56 listd:	 jp bioslist 
+   F212 C3 86 F4             57 punch:	 jp biospunch 
+   F215 C3 CF F4             58 reader:	 jp biosreader 
+   F218 C3 15 F5             59 home:	 jp bioshome 
+   F21B C3 1E F5             60 seldsk:	 jp biosseldsk 
+   F21E C3 3B F5             61 settrk:	 jp biossettrk 
+   F221 C3 40 F5             62 setsec:	 jp biossetsec 
+   F224 C3 45 F5             63 setdma:	 jp biossetdma 
+   F227 C3 4A F5             64 read:	 jp biosread 
+   F22A C3 9F F5             65 write:	 jp bioswrite 
+   F22D C3 E5 F5             66 listst:	 jp bioslistst 
+   F230 C3 1F F6             67 sectrn:	 jp biossectrn
+                             68 
+                             69 ;
+                             70 ;	Data tables for disks
+                             71 ;	Four disks, 26 sectors/track, disk size = number of 1024 byte blocks
+                             72 ;	Number of directory entries (32-bytes each) set to 127 per 500 blocks
+                             73 ;	Allocation map bits = number of blocks needed to contain directory entries
+                             74 ;	No translations -- translation maps commented out
+                             75 ;
+                             76 ;	disk Parameter header for disk 00
+   F233                      77 dpbase:
+   F233 00 00 00 00          78 	.dw	0x0000, 0x0000
+   F237 00 00 00 00          79 	.dw	0x0000, 0x0000
+   F23B 3A F6 73 F2          80 	.dw	dirbf, dpblk
+   F23F BA F8 BA F6          81 	.dw	chk00, all00
+                             82 ;	disk parameter header for disk 01
+   F243 00 00 00 00          83 	.dw	0x0000, 0x0000
+   F247 00 00 00 00          84 	.dw	0x0000, 0x0000
+   F24B 3A F6 73 F2          85 	.dw	dirbf, dpblk
+   F24F BB F8 3A F7          86 	.dw	chk01, all01
+                             87 ;	disk parameter header for disk 02
+   F253 00 00 00 00          88 	.dw	0x0000, 0x0000
+   F257 00 00 00 00          89 	.dw	0x0000, 0x0000
+   F25B 3A F6 73 F2          90 	.dw	dirbf, dpblk
+   F25F BC F8 BA F7          91 	.dw	chk02, all02
+                             92 ;	disk parameter header for disk 03
+   F263 00 00 00 00          93 	.dw	0x0000, 0x0000
+   F267 00 00 00 00          94 	.dw	0x0000, 0x0000
+   F26B 3A F6 73 F2          95 	.dw	dirbf, dpblk
+   F26F BD F8 3A F8          96 	.dw	chk03, all03
+                             97 ;
+                             98 ;	sector translate vector
+                             99 ;Since no translation will comment out
+                            100 ;trans:	db	 1,  7, 13, 19	;sectors  1,  2,  3,  4
+                            101 ;	.db	25,  5, 11, 17	;sectors  5,  6,  7,  6
+                            102 ;	.db	23,  3,  9, 15	;sectors  9, 10, 11, 12
+                            103 ;	.db	21,  2,  8, 14	;sectors 13, 14, 15, 16
+                            104 ;	.db	20, 26,  6, 12	;sectors 17, 18, 19, 20
+                            105 ;	.db	18, 24,  4, 10	;sectors 21, 22, 23, 24
+                            106 ;	.db	16, 22		;sectors 25, 26
+                            107 ;
+   F273                     108 dpblk:	;disk parameter block for all disks.
+   F273 00 01               109 	.dw	256		;sectors per track
+   F275 04                  110 	.db	4		;block shift factor
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 3.
+Hexadecimal [16-Bits]
+
+
+
+   F276 0F                  111 	.db	15		;block mask - with block shift, sets block size to 1024
+   F277 00                  112 	.db	0		;null mask
+   F278 FF 03               113 	.dw	1023		;disk size-1 = number of blocks in a disk - 1
+   F27A 00 01               114 	.dw	256		;directory max = no. directory entries/disk, arbitrary
+   F27C F0                  115 	.db	240		;alloc 0 -- need 4 bits (blocks) for 256 directory entries -- 
+   F27D 00                  116 	.db	0		;alloc 1 -- no. bits = (directory max x 32)/block size	
+   F27E 00 00               117 	.dw	0		;check size -- no checking, so zero
+   F280 01 00               118 	.dw	1		;track offset -- first track for system
+                            119 
+                            120 ;
+                            121 ;	end of fixed tables
+                            122 ;
+   F282                     123 cpmstart:
+   F282 11 00 DC            124 	ld de,#0xdc00
+   F285 ED 53 2A F6         125 	ld (dmatmp4diskemu),de
+   F289 3E 00               126 	ld a,#0
+   F28B 32 2C F6            127 	ld (dmatmp4diskemu+2),a
+   F28E 32 2D F6            128 	ld (dmatmp4diskemu+3),a
+   F291 32 2E F6            129 	ld (dmatmp4diskemu+4),a
+   F294 32 2F F6            130 	ld (dmatmp4diskemu+5),a
+   F297 2E 01               131 	ld l,#1
+   F299 26 00               132 	ld h,#0
+   F29B 06 2C               133 	ld b,#44
+   F29D                     134 cpmbios_cpmload:
+   F29D 7D                  135 	ld a,l
+   F29E 32 2C F6            136 	ld (dmatmp4diskemu+2),a
+   F2A1 3E 00               137 	ld a,#0
+   F2A3 32 2E F6            138 	ld (dmatmp4diskemu+4),a
+   F2A6 CD 4A F5            139 	call biosread
+   F2A9 2C                  140 	inc l
+   F2AA                     141 cpmbios_cpmload_dmaaddrset:
+   F2AA 7B                  142 	ld a,e
+   F2AB C6 80               143 	add a,#0x80
+   F2AD 5F                  144 	ld e,a
+   F2AE 7A                  145 	ld a,d
+   F2AF CE 00               146 	adc a,#0
+   F2B1 57                  147 	ld d,a
+   F2B2 ED 53 2A F6         148 	ld (dmatmp4diskemu),de
+   F2B6 10 E5               149 	djnz cpmbios_cpmload
+   F2B8 3E C3               150 	ld a,#0xc3
+   F2BA 21 03 F2            151 	ld hl,#wboot
+   F2BD 32 00 00            152 	ld (0x0000),a
+   F2C0 22 01 00            153 	ld (0x0001),hl
+   F2C3 21 06 E4            154 	ld hl,#0xe406
+   F2C6 32 05 00            155 	ld (0x0005),a
+   F2C9 22 06 00            156 	ld (0x0006),hl
+   F2CC 11 80 00            157 	ld de,#0x0080
+   F2CF ED 53 2A F6         158 	ld (dmatmp4diskemu),de
+   F2D3 3A 04 00            159 	ld a,(0x0004)
+   F2D6 E6 0F               160 	and a,#0xf
+   F2D8 32 39 F6            161 	ld (diskno),a
+   F2DB 4F                  162 	ld c,a
+   F2DC 31 80 00            163 	ld sp,#0x0080
+   F2DF C3 00 DC            164 	jp 0xdc00
+   F2E2                     165 biosboot: 
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 4.
+Hexadecimal [16-Bits]
+
+
+
+   F2E2 AF                  166 	xor a,a
+   F2E3 32 39 F6            167 	ld (diskno),a
+   F2E6 31 00 FC            168 	ld sp,#0xfc00
+   F2E9 3E 08               169 	ld	a,#0x08			;proc=OSC,pclk=osc,periodic interrupt=disable
+   F2EB D3                  170 	ioi
+   F2EC 32 00 00            171 	ld	(GCSR),a
+                            172 	;ld	a,#0x00			;0x000000 Use /OE0 or /WE0 Use CS0
+                            173 	;ioi
+                            174 	;ld	(MB0CR),a		;use ROM
+                            175 	;ld	a,#0x00			;0x400000 Use /OE1 or /WE1 Use CS1
+                            176 	;ioi
+                            177 	;ld	(MB1CR),a		;use RAM
+                            178 ;
+                            179 	;ld	a,#0x01			;PCLK/2 Timer A Enabled
+                            180 	;ioi
+                            181 	;ld	(TACSR),a
+                            182 	;ld	a,#0x00			;Timer A4~A7 Clocked by PCLK/2,interrupts disabled
+                            183 	;ioi
+                            184 	;ld	(TACR),a
+                            185 	;ld	a,#0x0f		;A-ch Clock timer :=(PCLK/2/16/38400)-1 (PCLK=19.6608MHz >> 38400bps)
+                            186 	;ioi
+                            187 	;ld	(TAT4R),a
+                            188 
+                            189 	;ld	a,#0x10			;MMU Data Reg Physics address 0x10000 (CS1)
+                            190 	;ioi
+                            191 	;ld	(DATASEG),a
+                            192 	;ld	a,#0x10			;MMU Stack Reg Physics address 0x10000 (CS1)
+                            193 	;ioi
+                            194 	;ld 	(STACKSEG),a
+   F2EF 3E 00               195 	ld	a,#0x00			;MMU Segsize logic Data address 0x0000 (CS1:0x10000)
+   F2F1 D3                  196 	ioi
+   F2F2 32 13 00            197 	ld	(SEGSIZE),a		;MMU Segsize logic Stack address 0x0000 (CS1:0x10000)
+                            198 	
+   F2F5 3E 10               199 	ld	a,#0x10			;MMU XPC Physics address 0x10000 (CS1:0x1e000)
+   F2F7 ED 67               200 	ld	xpc,a
+   F2F9 CD 15 F3            201 	call	ppinit			;parallel ports initialize
+   F2FC CD 1C F3            202 	call	sioinit			;serial channel initialize
+                            203 	
+   F2FF 31 80 00            204 	ld sp,#0x0080
+                            205 	;ld a,#0b010010101
+   F302 3E 94               206 	ld a,#0b010010100
+   F304 32 03 00            207 	ld (0x0003),a
+   F307 3E 00               208 	ld a,#0
+   F309 32 04 00            209 	ld (0x0004),a
+   F30C 21 59 F3            210 	ld hl,#hellomes
+   F30F CD 6A F3            211 	call showmes
+   F312 C3 82 F2            212 	jp cpmstart
+   F315                     213 ppinit:
+   F315 3E 40               214 	ld	a,#0x40
+   F317 D3                  215 	ioi
+   F318 32 55 00            216 	ld	(PCFR),a		;C Port TxA set
+   F31B C9                  217 	ret
+   F31C                     218 sioinit:
+   F31C 3E 00               219 	ld	a,#0x00
+   F31E D3                  220 	ioi
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 5.
+Hexadecimal [16-Bits]
+
+
+
+   F31F 32 C4 00            221 	ld	(SACR),a		;Asynch mode, C port used, 8bit, Interrupt Disabled
+   F322 C9                  222 	ret
+                            223 
+   F323                     224 putchar:				
+   F323 F5                  225 	push	af
+   F324                     226 putchar01:
+   F324 D3                  227 	ioi
+   F325 3A C3 00            228 	ld	a,(SASR)		;Serial A port Status in
+   F328 CB 5F               229       	bit     3,a			
+   F32A 20 F8               230         jr      nz,putchar01		;XMIT DATA REG > Full(bit3==1) check
+   F32C F1                  231  	pop	af
+   F32D F5                  232  	push	af
+   F32E D3                  233 	ioi
+   F32F 32 C0 00            234 	ld	(SADR),a		;no full(Empty) >> TxA data out
+   F332                     235 putchar_busy:
+   F332 D3                  236 	ioi
+   F333 3A C3 00            237 	ld	a,(SASR)		;Serial A port Status in
+   F336 CB 5F               238 	bit	3,a			;XMIT DATA REG > Full(bit3==1) check 
+   F338 20 F8               239 	jr	nz,putchar_busy
+   F33A F1                  240 	pop	af			;no full(Empty) >> return
+   F33B C9                  241 	ret
+                            242 	
+   F33C                     243 getchar:
+   F33C D3                  244 	ioi
+   F33D 3A C3 00            245 	ld 	a,(SASR)		;Serial A port Status in
+   F340 CB 7F               246 	bit	7,a			;RCV DATA REG > EMPTY(bit7==0) check
+   F342 28 F8               247 	jr	z,getchar
+   F344 D3                  248 	ioi
+   F345 3A C0 00            249 	ld	a,(SADR)		;No EMPTY(Full) > RxA data in
+   F348 F5                  250 	push	af
+   F349                     251 getchar01:
+   F349 D3                  252 	ioi
+   F34A 3A C3 00            253 	ld	a,(SASR)		;Serial A port Status in
+   F34D CB 7F               254 	bit	7,a			;RCV DATA REG >EMPTY(bit7==0) check
+   F34F 20 F8               255 	jr	nz,getchar01
+   F351 F1                  256 	pop	af			;EMPTY >> return
+   F352 C9                  257 	ret
+                            258 
+   F353                     259 bioswboot: 
+   F353 31 FF FF            260 	ld sp,#0xffff
+   F356 C3 82 F2            261 	jp cpmstart
+                            262 
+   F359 36 32 6B 20 43 50   263 hellomes:.ascii "62k CP/M ver 2.2"
+        2F 4D 20 76 65 72
+        20 32 2E 32
+   F369 00                  264 .db 0x00
+   F36A                     265 showmes:
+   F36A 4E                  266 	ld c,(hl)
+   F36B CD 0B F4            267 	call biosconout
+   F36E 23                  268 	inc hl
+   F36F 7E                  269 	ld a,(hl)
+   F370 A7                  270 	and a
+   F371 20 F7               271 	jr nz,showmes
+   F373 C9                  272 	ret
+                            273 
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 6.
+Hexadecimal [16-Bits]
+
+
+
+   F374                     274 biosconst: 
+   F374 3A 03 00            275 	ld a,(0x0003)
+   F377 E6 03               276 	and a,#3
+   F379 FE 00               277 	cp a,#0
+   F37B 28 0C               278 	jr z,const_tty
+   F37D FE 01               279 	cp a,#1
+   F37F 28 2D               280 	jr z,const_crt
+   F381 FE 02               281 	cp a,#2
+   F383 CA E5 F5            282 	jp z,bioslistst
+   F386 3E 00               283 	ld a,#0x0
+   F388 C9                  284 	ret
+   F389                     285 const_tty:
+   F389 ED 43 22 F6         286 	ld (cpmbios_bcbak),bc
+   F38D ED 53 24 F6         287 	ld (cpmbios_debak),de
+   F391 22 26 F6            288 	ld (cpmbios_hlbak),hl
+   F394 D3                  289 	ioi
+   F395 3A C3 00            290 	ld 	a,(SASR)		;Serial A port Status in
+   F398 CB 7F               291 	bit	7,a			;RCV DATA REG > EMPTY(bit7==0) check
+   F39A 28 0E               292 	jr	z,const_tty_
+   F39C 3E FF               293 	ld a,#0xff
+   F39E                     294 const_tty__:
+   F39E ED 4B 22 F6         295 	ld bc,(cpmbios_bcbak)
+   F3A2 ED 5B 24 F6         296 	ld de,(cpmbios_debak)
+   F3A6 2A 26 F6            297 	ld hl,(cpmbios_hlbak)
+   F3A9 C9                  298 	ret
+   F3AA                     299 const_tty_:
+   F3AA 3E 00               300 	ld a,#0x00
+   F3AC 18 F0               301 	jr const_tty__
+   F3AE                     302 const_crt:
+   F3AE ED 43 22 F6         303 	ld (cpmbios_bcbak),bc
+   F3B2 ED 53 24 F6         304 	ld (cpmbios_debak),de
+   F3B6 22 26 F6            305 	ld (cpmbios_hlbak),hl
+                            306 	
+   F3B9 ED 4B 22 F6         307 	ld bc,(cpmbios_bcbak)
+   F3BD ED 5B 24 F6         308 	ld de,(cpmbios_debak)
+   F3C1 2A 26 F6            309 	ld hl,(cpmbios_hlbak)
+   F3C4 C9                  310 	ret
+   F3C5                     311 biosconin: 
+   F3C5 3A 03 00            312 	ld a,(0x0003)
+   F3C8 E6 03               313 	and a,#3
+   F3CA FE 00               314 	cp a,#0
+   F3CC 28 0C               315 	jr z,conin_tty
+   F3CE FE 01               316 	cp a,#1
+   F3D0 28 22               317 	jr z,conin_crt
+   F3D2 FE 02               318 	cp a,#2
+   F3D4 CA CF F4            319 	jp z,biosreader
+   F3D7 3E 00               320 	ld a,#0x0
+   F3D9 C9                  321 	ret
+   F3DA                     322 conin_tty:
+   F3DA ED 43 22 F6         323 	ld (cpmbios_bcbak),bc
+   F3DE ED 53 24 F6         324 	ld (cpmbios_debak),de
+   F3E2 22 26 F6            325 	ld (cpmbios_hlbak),hl
+   F3E5 CD 3C F3            326 	call getchar
+   F3E8 ED 4B 22 F6         327 	ld bc,(cpmbios_bcbak)
+   F3EC ED 5B 24 F6         328 	ld de,(cpmbios_debak)
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 7.
+Hexadecimal [16-Bits]
+
+
+
+   F3F0 2A 26 F6            329 	ld hl,(cpmbios_hlbak)
+   F3F3 C9                  330 	ret
+   F3F4                     331 conin_crt:
+   F3F4 ED 43 22 F6         332 	ld (cpmbios_bcbak),bc
+   F3F8 ED 53 24 F6         333 	ld (cpmbios_debak),de
+   F3FC 22 26 F6            334 	ld (cpmbios_hlbak),hl
+                            335 
+   F3FF ED 4B 22 F6         336 	ld bc,(cpmbios_bcbak)
+   F403 ED 5B 24 F6         337 	ld de,(cpmbios_debak)
+   F407 2A 26 F6            338 	ld hl,(cpmbios_hlbak)
+   F40A C9                  339 	ret
+   F40B                     340 biosconout: 
+   F40B 3A 03 00            341 	ld a,(0x0003)
+   F40E E6 03               342 	and a,#3
+   F410 FE 00               343 	cp a,#0
+   F412 28 0B               344 	jr z,conout_tty
+   F414 FE 01               345 	cp a,#1
+   F416 28 22               346 	jr z,conout_crt
+   F418 FE 02               347 	cp a,#2
+   F41A CA 52 F4            348 	jp z,bioslist
+   F41D 79                  349 	ld a,c
+   F41E C9                  350 	ret
+   F41F                     351 conout_tty:
+   F41F 79                  352 	ld a,c
+   F420 ED 43 22 F6         353 	ld (cpmbios_bcbak),bc
+   F424 ED 53 24 F6         354 	ld (cpmbios_debak),de
+   F428 22 26 F6            355 	ld (cpmbios_hlbak),hl
+   F42B CD 23 F3            356 	    call putchar
+   F42E ED 4B 22 F6         357 	ld bc,(cpmbios_bcbak)
+   F432 ED 5B 24 F6         358 	ld de,(cpmbios_debak)
+   F436 2A 26 F6            359 	ld hl,(cpmbios_hlbak)
+   F439 C9                  360 	ret
+   F43A                     361 conout_crt:
+   F43A 79                  362 	ld a,c
+   F43B ED 43 22 F6         363 	ld (cpmbios_bcbak),bc
+   F43F ED 53 24 F6         364 	ld (cpmbios_debak),de
+   F443 22 26 F6            365 	ld (cpmbios_hlbak),hl
+                            366 
+   F446 ED 4B 22 F6         367 	ld bc,(cpmbios_bcbak)
+   F44A ED 5B 24 F6         368 	ld de,(cpmbios_debak)
+   F44E 2A 26 F6            369 	ld hl,(cpmbios_hlbak)
+   F451 C9                  370 	ret
+   F452                     371 bioslist: 
+   F452 3A 03 00            372 	ld a,(0x0003)
+   F455 0F                  373 	rrca
+   F456 0F                  374 	rrca
+   F457 0F                  375 	rrca
+   F458 0F                  376 	rrca
+   F459 0F                  377 	rrca
+   F45A 0F                  378 	rrca
+   F45B E6 03               379 	and a,#3
+   F45D FE 00               380 	cp a,#0
+   F45F CA 1F F4            381 	jp z,conout_tty
+   F462 FE 01               382 	cp a,#1
+   F464 CA 3A F4            383 	jp z,conout_crt
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 8.
+Hexadecimal [16-Bits]
+
+
+
+   F467 FE 02               384 	cp a,#2
+   F469 CA 6E F4            385 	jp z,list_lpt
+   F46C 79                  386 	ld a,c
+   F46D C9                  387 	ret
+   F46E                     388 list_lpt:
+   F46E 79                  389 	ld a,c
+   F46F ED 43 22 F6         390 	ld (cpmbios_bcbak),bc
+   F473 ED 53 24 F6         391 	ld (cpmbios_debak),de
+   F477 22 26 F6            392 	ld (cpmbios_hlbak),hl
+                            393 
+   F47A ED 4B 22 F6         394 	ld bc,(cpmbios_bcbak)
+   F47E ED 5B 24 F6         395 	ld de,(cpmbios_debak)
+   F482 2A 26 F6            396 	ld hl,(cpmbios_hlbak)
+   F485 C9                  397 	ret
+   F486                     398 biospunch: 
+   F486 3A 03 00            399 	ld a,(0x0003)
+   F489 0F                  400 	rrca
+   F48A 0F                  401 	rrca
+   F48B 0F                  402 	rrca
+   F48C 0F                  403 	rrca
+   F48D E6 03               404 	and a,#3
+   F48F FE 00               405 	cp a,#0
+   F491 CA 1F F4            406 	jp z,conout_tty
+   F494 FE 01               407 	cp a,#1
+   F496 28 07               408 	jr z,punch_ptp
+   F498 FE 02               409 	cp a,#2
+   F49A CA B7 F4            410 	jp z,punch_up1
+   F49D 79                  411 	ld a,c
+   F49E C9                  412 	ret
+   F49F                     413 punch_ptp:
+   F49F 79                  414 	ld a,c
+   F4A0 ED 43 22 F6         415 	ld (cpmbios_bcbak),bc
+   F4A4 ED 53 24 F6         416 	ld (cpmbios_debak),de
+   F4A8 22 26 F6            417 	ld (cpmbios_hlbak),hl
+                            418 
+   F4AB ED 4B 22 F6         419 	ld bc,(cpmbios_bcbak)
+   F4AF ED 5B 24 F6         420 	ld de,(cpmbios_debak)
+   F4B3 2A 26 F6            421 	ld hl,(cpmbios_hlbak)
+   F4B6 C9                  422 	ret
+   F4B7                     423 punch_up1:
+   F4B7 79                  424 	ld a,c
+   F4B8 ED 43 22 F6         425 	ld (cpmbios_bcbak),bc
+   F4BC ED 53 24 F6         426 	ld (cpmbios_debak),de
+   F4C0 22 26 F6            427 	ld (cpmbios_hlbak),hl
+                            428 
+   F4C3 ED 4B 22 F6         429 	ld bc,(cpmbios_bcbak)
+   F4C7 ED 5B 24 F6         430 	ld de,(cpmbios_debak)
+   F4CB 2A 26 F6            431 	ld hl,(cpmbios_hlbak)
+   F4CE C9                  432 	ret
+   F4CF                     433 biosreader: 
+   F4CF 3A 03 00            434 	ld a,(0x0003)
+   F4D2 0F                  435 	rrca
+   F4D3 0F                  436 	rrca
+   F4D4 E6 03               437 	and a,#3
+   F4D6 FE 00               438 	cp a,#0
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 9.
+Hexadecimal [16-Bits]
+
+
+
+   F4D8 CA DA F3            439 	jp z,conin_tty
+   F4DB FE 01               440 	cp a,#1
+   F4DD 28 08               441 	jr z,reader_ptr
+   F4DF FE 02               442 	cp a,#2
+   F4E1 CA FE F4            443 	jp z,reader_ur1
+   F4E4 3E 00               444 	ld a,#0
+   F4E6 C9                  445 	ret
+   F4E7                     446 reader_ptr:
+   F4E7 ED 43 22 F6         447 	ld (cpmbios_bcbak),bc
+   F4EB ED 53 24 F6         448 	ld (cpmbios_debak),de
+   F4EF 22 26 F6            449 	ld (cpmbios_hlbak),hl
+                            450 
+   F4F2 ED 4B 22 F6         451 	ld bc,(cpmbios_bcbak)
+   F4F6 ED 5B 24 F6         452 	ld de,(cpmbios_debak)
+   F4FA 2A 26 F6            453 	ld hl,(cpmbios_hlbak)
+   F4FD C9                  454 	ret
+   F4FE                     455 reader_ur1:
+   F4FE ED 43 22 F6         456 	ld (cpmbios_bcbak),bc
+   F502 ED 53 24 F6         457 	ld (cpmbios_debak),de
+   F506 22 26 F6            458 	ld (cpmbios_hlbak),hl
+                            459 
+   F509 ED 4B 22 F6         460 	ld bc,(cpmbios_bcbak)
+   F50D ED 5B 24 F6         461 	ld de,(cpmbios_debak)
+   F511 2A 26 F6            462 	ld hl,(cpmbios_hlbak)
+   F514 C9                  463 	ret
+   F515                     464 bioshome: 
+   F515 3E 00               465 	ld a,#0
+   F517 32 2E F6            466 	ld (dmatmp4diskemu+4),a
+   F51A 32 2F F6            467 	ld (dmatmp4diskemu+5),a
+   F51D C9                  468 	ret
+   F51E                     469 biosseldsk: 
+   F51E 79                  470 	ld a,c
+   F51F FE 01               471 	cp a,#1
+   F521 30 12               472 	jr nc,biosseldsk_0
+   F523 32 39 F6            473 	ld (diskno),a
+   F526 21 00 00            474 	ld hl,#0
+   F529 69                  475 	ld l,c
+   F52A 29                  476 	add hl,hl
+   F52B 29                  477 	add hl,hl
+   F52C 29                  478 	add hl,hl
+   F52D 29                  479 	add hl,hl
+   F52E 01 33 F2            480 	ld bc,#dpbase
+   F531 09                  481 	add hl,bc
+   F532 CB 83               482 	res 0,e
+   F534 C9                  483 	ret
+   F535                     484 biosseldsk_0:
+   F535 21 00 00            485 	ld hl,#0x0
+   F538 CB C3               486 	set 0,e
+   F53A C9                  487 	ret
+   F53B                     488 biossettrk: 
+   F53B ED 43 2E F6         489 	ld (dmatmp4diskemu+4),bc
+   F53F C9                  490 	ret
+   F540                     491 biossetsec:
+   F540 ED 43 2C F6         492 	ld (dmatmp4diskemu+2),bc
+   F544 C9                  493 	ret
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 10.
+Hexadecimal [16-Bits]
+
+
+
+   F545                     494 biossetdma: 
+   F545 ED 43 2A F6         495 	ld (dmatmp4diskemu),bc
+   F549 C9                  496 	ret
+   F54A                     497 biosread: 
+   F54A ED 43 22 F6         498 	ld (cpmbios_bcbak),bc
+   F54E ED 53 24 F6         499 	ld (cpmbios_debak),de
+   F552 22 26 F6            500 	ld (cpmbios_hlbak),hl
+   F555 3A 2C F6            501 	ld a,(dmatmp4diskemu+2)
+   F558 DB                  502 	ioe
+   F559 32 00 00            503 	ld (0x0000),a
+   F55C 3A 2E F6            504 	ld a,(dmatmp4diskemu+4)
+   F55F DB                  505 	ioe
+   F560 32 01 00            506 	ld (0x0001),a
+   F563 2A 2A F6            507 	ld hl,(dmatmp4diskemu)
+   F566 DB                  508 	ioe
+   F567 22 02 00            509 	ld (0x0002),hl
+   F56A 3E 01               510 	ld a,#0x01
+   F56C DB                  511 	ioe
+   F56D 32 04 00            512 	ld (0x0004),a
+   F570 3A 39 F6            513 	ld a,(diskno)
+   F573 17                  514 	rla
+   F574 CB C7               515 	set 0,a
+   F576 DB                  516 	ioe
+   F577 32 05 00            517 	ld (0x0005),a
+   F57A DB                  518 	ioe
+   F57B 3A 05 00            519 	ld a,(0x0005)
+   F57E CB 47               520 	bit 0,a
+   F580 20 0E               521 	jr nz,biosreadwrite_err
+   F582 ED 4B 22 F6         522 	ld bc,(cpmbios_bcbak)
+   F586 ED 5B 24 F6         523 	ld de,(cpmbios_debak)
+   F58A 2A 26 F6            524 	ld hl,(cpmbios_hlbak)
+   F58D 3E 00               525 	ld a,#0
+   F58F C9                  526 	ret
+                            527 
+   F590                     528 biosreadwrite_err:
+   F590 ED 4B 22 F6         529 	ld bc,(cpmbios_bcbak)
+   F594 ED 5B 24 F6         530 	ld de,(cpmbios_debak)
+   F598 2A 26 F6            531 	ld hl,(cpmbios_hlbak)
+   F59B 3E FF               532 	ld a,#0xff
+   F59D C9                  533 	ret
+   F59E 00                  534 biosrw_backupflashstate:	.db 0
+   F59F                     535 bioswrite: 
+   F59F ED 43 22 F6         536 	ld (cpmbios_bcbak),bc
+   F5A3 ED 53 24 F6         537 	ld (cpmbios_debak),de
+   F5A7 22 26 F6            538 	ld (cpmbios_hlbak),hl
+   F5AA 3A 2C F6            539 	ld a,(dmatmp4diskemu+2)
+   F5AD DB                  540 	ioe
+   F5AE 32 00 00            541 	ld (0x0000),a
+   F5B1 3A 2E F6            542 	ld a,(dmatmp4diskemu+4)
+   F5B4 DB                  543 	ioe
+   F5B5 32 01 00            544 	ld (0x0001),a
+   F5B8 2A 2A F6            545 	ld hl,(dmatmp4diskemu)
+   F5BB DB                  546 	ioe
+   F5BC 22 02 00            547 	ld (0x0002),hl
+   F5BF 3E 01               548 	ld a,#0x01
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 11.
+Hexadecimal [16-Bits]
+
+
+
+   F5C1 DB                  549 	ioe
+   F5C2 32 04 00            550 	ld (0x0004),a
+   F5C5 3A 39 F6            551 	ld a,(diskno)
+   F5C8 17                  552 	rla
+   F5C9 CB C7               553 	set 0,a
+   F5CB DB                  554 	ioe
+   F5CC 32 05 00            555 	ld (0x0005),a
+   F5CF DB                  556 	ioe
+   F5D0 3A 05 00            557 	ld a,(0x0005)
+   F5D3 CB 47               558 	bit 0,a
+   F5D5 20 B9               559 	jr nz,biosreadwrite_err
+   F5D7 ED 4B 22 F6         560 	ld bc,(cpmbios_bcbak)
+   F5DB ED 5B 24 F6         561 	ld de,(cpmbios_debak)
+   F5DF 2A 26 F6            562 	ld hl,(cpmbios_hlbak)
+   F5E2 3E 00               563 	ld a,#0
+   F5E4 C9                  564 	ret
+   F5E5                     565 bioslistst: 
+   F5E5 3A 03 00            566 	ld a,(0x0003)
+   F5E8 0F                  567 	rrca
+   F5E9 0F                  568 	rrca
+   F5EA 0F                  569 	rrca
+   F5EB 0F                  570 	rrca
+   F5EC 0F                  571 	rrca
+   F5ED 0F                  572 	rrca
+   F5EE E6 03               573 	and a,#3
+   F5F0 FE 00               574 	cp a,#0
+   F5F2 CA 89 F3            575 	jp z,const_tty
+   F5F5 FE 01               576 	cp a,#1
+   F5F7 CA AE F3            577 	jp z,const_crt
+   F5FA FE 02               578 	cp a,#2
+   F5FC CA 02 F6            579 	jp z,listst_lpt
+   F5FF 3E 00               580 	ld a,#0
+   F601 C9                  581 	ret
+   F602                     582 listst_lpt:
+   F602 ED 43 22 F6         583 	ld (cpmbios_bcbak),bc
+   F606 ED 53 24 F6         584 	ld (cpmbios_debak),de
+   F60A 22 26 F6            585 	ld (cpmbios_hlbak),hl
+   F60D 32 28 F6            586 	ld (cpmbios_afbak),a
+                            587 
+   F610 ED 4B 22 F6         588 	ld bc,(cpmbios_bcbak)
+   F614 ED 5B 24 F6         589 	ld de,(cpmbios_debak)
+   F618 2A 26 F6            590 	ld hl,(cpmbios_hlbak)
+   F61B 3A 28 F6            591 	ld a,(cpmbios_afbak)
+   F61E C9                  592 	ret
+   F61F                     593 biossectrn:
+   F61F EB                  594 	ex de,hl
+   F620 09                  595 	add hl,bc
+   F621 C9                  596 	ret
+                            597 
+   F622 00 00               598 cpmbios_bcbak:.dw 0
+   F624 00 00               599 cpmbios_debak:.dw 0
+   F626 00 00               600 cpmbios_hlbak:.dw 0
+   F628 00 00               601 cpmbios_afbak:.dw 0
+   F62A 00 00               602 dmatmp4diskemu:.dw 0
+   F62C 00 00               603 	.dw 0
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 12.
+Hexadecimal [16-Bits]
+
+
+
+   F62E 00 00               604 	.dw 0
+   F630                     605 crtx:
+   F630 00                  606 	.db 0
+   F631                     607 crty:
+   F631 00                  608 	.db 0
+   F632                     609 kbuffer:
+   F632 00                  610 	.db 0
+                            611 ;
+                            612 ;	the remainder of the cbios is reserved uninitialized
+                            613 ;	data area, and does not need to be a Part of the
+                            614 ;	system	memory image (the space must be available,
+                            615 ;	however, between"begdat" and"enddat").
+                            616 ;
+   F633                     617 track:	.ds	2		;two bytes for expansion
+   F635                     618 sector:	.ds	2		;two bytes for expansion
+   F637                     619 dmaad:	.ds	2		;direct memory address
+   F639                     620 diskno:	.ds	1		;disk number 0-15
+                            621 ;
+                            622 ;	scratch ram area for bdos use
+   F63A                     623 begdat: ;beginning of data area
+   F63A                     624 dirbf:	.ds	128	 	;scratch directory area
+                            625 ;Allocation scratch areas, size of each must be (DSM/8)+1
+   F6BA                     626 all00:	.ds	128	 	;allocation vector 0
+   F73A                     627 all01:	.ds	128	 	;allocation vector 1
+   F7BA                     628 all02:	.ds	128	 	;allocation vector 2
+   F83A                     629 all03:	.ds	128	 	;allocation vector 3
+                            630 ;Could probably remove these chk areas, but just made size small
+   F8BA                     631 chk00:	.ds	1		;check vector 0
+   F8BB                     632 chk01:	.ds	1		;check vector 1
+   F8BC                     633 chk02:	.ds	1	 	;check vector 2
+   F8BD                     634 chk03:	.ds	1	 	;check vector 3
+                            635 ;
+   F8BE                     636 enddat:;end of data area
+                     0284   637 datsiz	.equ	enddat - begdat ;size of data area
+   F8BE                     638 hstbuf: 	.ds 256		;buffer for host disk sector
+   F9BE 00                  639 addrbeepconf:   .db 0x00

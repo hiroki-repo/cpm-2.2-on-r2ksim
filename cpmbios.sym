@@ -1,0 +1,53 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 1.
+Hexadecimal [16-Bits]
+
+Symbol Table
+
+    .__.$$$.=  2710 L   |     .__.ABS.=  0000 G   |     .__.CPU.=  0000 L
+    .__.H$L.=  0000 L   |     DATASEG =  0012     |     GCSR    =  0000 
+    GOCR    =  000E     |     MB0CR   =  0014     |     MB1CR   =  0015 
+    MMIDR   =  0010     |     PCDR    =  0050     |     PCFR    =  0055 
+    SACR    =  00C4     |     SADR    =  00C0     |     SALR    =  00C2 
+    SASR    =  00C3     |     SEGSIZE =  0013     |     STACKSEG=  0011 
+    TACR    =  00A4     |     TACSR   =  00A0     |     TAT1R   =  00A3 
+    TAT4R   =  00A9     |   2 addrbeep   F9BE R   |   2 all00      F6BA R
+  2 all01      F73A R   |   2 all02      F7BA R   |   2 all03      F83A R
+  2 begdat     F63A R   |   2 biosboot   F2E2 R   |   2 biosconi   F3C5 R
+  2 bioscono   F40B R   |   2 bioscons   F374 R   |   2 bioshome   F515 R
+  2 bioslist   F452 R   |   2 bioslist   F5E5 R   |   2 biospunc   F486 R
+  2 biosread   F54A R   |   2 biosread   F4CF R   |   2 biosread   F590 R
+  2 biosrw_b   F59E R   |   2 biossect   F61F R   |   2 biosseld   F51E R
+  2 biosseld   F535 R   |   2 biossetd   F545 R   |   2 biossets   F540 R
+  2 biossett   F53B R   |   2 bioswboo   F353 R   |   2 bioswrit   F59F R
+  2 boot       F200 R   |   2 chk00      F8BA R   |   2 chk01      F8BB R
+  2 chk02      F8BC R   |   2 chk03      F8BD R   |   2 conin      F209 R
+  2 conin_cr   F3F4 R   |   2 conin_tt   F3DA R   |   2 conout     F20C R
+  2 conout_c   F43A R   |   2 conout_t   F41F R   |   2 const      F206 R
+  2 const_cr   F3AE R   |   2 const_tt   F389 R   |   2 const_tt   F3AA R
+  2 const_tt   F39E R   |   2 cpmbios_   F628 R   |   2 cpmbios_   F622 R
+  2 cpmbios_   F29D R   |   2 cpmbios_   F2AA R   |   2 cpmbios_   F624 R
+  2 cpmbios_   F626 R   |   2 cpmstart   F282 R   |   2 crtx       F630 R
+  2 crty       F631 R   |     datsiz  =  0284     |   2 dirbf      F63A R
+  2 diskno     F639 R   |   2 dmaad      F637 R   |   2 dmatmp4d   F62A R
+  2 dpbase     F233 R   |   2 dpblk      F273 R   |   2 enddat     F8BE R
+  2 getchar    F33C R   |   2 getchar0   F349 R   |   2 hellomes   F359 R
+  2 home       F218 R   |   2 hstbuf     F8BE R   |   2 kbuffer    F632 R
+  2 list_lpt   F46E R   |   2 listd      F20F R   |   2 listst     F22D R
+  2 listst_l   F602 R   |   2 ppinit     F315 R   |   2 punch      F212 R
+  2 punch_pt   F49F R   |   2 punch_up   F4B7 R   |   2 putchar    F323 R
+  2 putchar0   F324 R   |   2 putchar_   F332 R   |   2 read       F227 R
+  2 reader     F215 R   |   2 reader_p   F4E7 R   |   2 reader_u   F4FE R
+  2 sector     F635 R   |   2 sectrn     F230 R   |   2 seldsk     F21B R
+  2 setdma     F224 R   |   2 setsec     F221 R   |   2 settrk     F21E R
+  2 showmes    F36A R   |   2 sioinit    F31C R   |   2 track      F633 R
+  2 wboot      F203 R   |   2 write      F22A R
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 2.
+Hexadecimal [16-Bits]
+
+Area Table
+
+   0 _CODE      size    0   flags    0
+   1 TEST       size    0   flags    8
+   2 TEST0      size  7BF   flags    8
+

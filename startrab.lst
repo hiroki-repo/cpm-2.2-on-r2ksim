@@ -1,0 +1,106 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 1.
+Hexadecimal [16-Bits]
+
+
+
+                              1 .r2k
+                              2 .area TEST(ABS)
+                              3 
+                              4 ;;Global Control/Status Register
+                     0000     5 GCSR	.equ	0x00
+                              6 ;;Global Output Control Register
+                     000E     7 GOCR	.equ	0x0e
+                              8 ;;MMU: Memory Bank 0 Control Ragister
+                     0014     9 MB0CR	.equ	0x14
+                             10 ;;MMU: Memory Bank 1 Control Ragister
+                     0015    11 MB1CR	.equ	0x15
+                             12 ;;MMU: Memory Bank 2 Control Ragister
+                     0016    13 MB2CR	.equ	0x16
+                             14 ;;MMU: Memory Bank 3 Control Ragister
+                     0017    15 MB3CR	.equ	0x17
+                             16 ;;MMU: MMU Instruction/Data Register
+                     0010    17 MMIDR	.equ	0x10
+                             18 ;;MMU: Data Segment Register(Z180 BBR)
+                     0012    19 DATASEG	.equ	0x12
+                             20 ;;MMU: Segment Size Register(Z180 CBAR)
+                     0013    21 SEGSIZE	.equ	0x13
+                             22 ;;MMU: Stack Segment Register(Z180 CBR)
+                     0011    23 STACKSEG	.equ	0x11
+                             24 
+                             25 
+                             26 ;;Parallel ports 
+                             27 ;;PPC
+                             28 ;;Port C Data Ragister
+                     0050    29 PCDR	.equ	0x50
+                             30 ;;Port C Function Ragister
+                     0055    31 PCFR	.equ	0x55
+                             32 
+                             33 
+                             34 ;;Timer A
+                             35 ;;Timer A Control/Status Register
+                     00A0    36 TACSR	.equ	0xa0
+                             37 ;;Timer A Control Register
+                     00A4    38 TACR	.equ	0xa4
+                             39 ;;Timer A1 Constant register
+                     00A3    40 TAT1R	.equ	0xA3
+                             41 ;;Timer A4 Constant register
+                     00A9    42 TAT4R	.equ	0xA9
+                             43 
+                             44 ;;Serial A port
+                             45 ;;Serial A Port Status Register
+                     00C3    46 SASR	.equ	0xc3
+                             47 ;;Serial A port Control Register
+                     00C4    48 SACR	.equ	0xc4
+                             49 ;;Serial A port Data Register
+                     00C0    50 SADR	.equ	0xc0
+                             51 ;;Serial A port Long Register
+                     00C2    52 SALR	.equ	0xc2
+                             53 
+   0000                      54 .org 0x0000
+                             55 
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000), page 2.
+Hexadecimal [16-Bits]
+
+
+
+   0000 3E 08                56 	ld	a,#0x08			;proc=OSC,pclk=osc,periodic interrupt=disable
+   0002 D3                   57 	ioi
+   0003 32 00 00             58 	ld	(GCSR),a
+   0006 3E 00                59 	ld	a,#0x00			;0x000000 Use /OE0 or /WE0 Use CS0
+   0008 D3                   60 	ioi
+   0009 32 14 00             61 	ld	(MB0CR),a		;use ROM
+   000C 3E 05                62 	ld	a,#0x05			;0x400000 Use /OE1 or /WE1 Use CS1
+   000E D3                   63 	ioi
+   000F 32 15 00             64 	ld	(MB1CR),a		;use RAM
+   0012 AF                   65 	xor a,a
+   0013 D3                   66 	ioi
+   0014 32 16 00             67 	ld	(MB2CR),a
+   0017 D3                   68 	ioi
+   0018 32 17 00             69 	ld	(MB3CR),a
+                             70 ;
+   001B 3E 01                71 	ld	a,#0x01			;PCLK/2 Timer A Enabled
+   001D D3                   72 	ioi
+   001E 32 A0 00             73 	ld	(TACSR),a
+   0021 3E 00                74 	ld	a,#0x00			;Timer A4~A7 Clocked by PCLK/2,interrupts disabled
+   0023 D3                   75 	ioi
+   0024 32 A4 00             76 	ld	(TACR),a
+   0027 3E 0F                77 	ld	a,#0x0f		;A-ch Clock timer :=(PCLK/2/16/38400)-1 (PCLK=19.6608MHz >> 38400bps)
+   0029 D3                   78 	ioi
+   002A 32 A9 00             79 	ld	(TAT4R),a
+                             80 
+   002D 3E 20                81 	ld	a,#0x20			;MMU Data Reg Physics address 0x20000 (CS1)
+   002F D3                   82 	ioi
+   0030 32 12 00             83 	ld	(DATASEG),a
+   0033 3E 10                84 	ld	a,#0x10			;MMU Stack Reg Physics address 0x10000 (CS2)
+   0035 D3                   85 	ioi
+   0036 32 11 00             86 	ld 	(STACKSEG),a
+   0039 3E A8                87 	ld	a,#0xa8			;MMU Segsize logic Data address 0x8000 (CS2:0x28000)
+   003B D3                   88 	ioi
+   003C 32 13 00             89 	ld	(SEGSIZE),a		;MMU Segsize logic Stack address 0xa000 (CS2:0x1a000)
+                             90 	
+   003F 3E 10                91 	ld	a,#0x10			;MMU XPC Physics address 0x10000 (CS2:0x1e000)
+   0041 ED 67                92 	ld	xpc,a
+                             93 
+   0043 31 00 FC             94 	ld sp,#0xfc00
+   0046 21 00 F2             95 	ld hl,#0xf200
+   0049 C3 00 FC             96 	jp 0xfc00

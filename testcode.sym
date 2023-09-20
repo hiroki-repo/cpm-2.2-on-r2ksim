@@ -1,0 +1,27 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000)         Page 1
+Hexadecimal [16-Bits]
+
+Symbol Table
+
+    .__.$$$.=  2710 L   |     .__.ABS.=  0000 G   |     .__.CPU.=  0000 L
+    .__.H$L.=  0000 L   |     DATASEG =  0012     |     GCSR    =  0000 
+    GOCR    =  000E     |     MB0CR   =  0014     |     MB1CR   =  0015 
+    MMIDR   =  0010     |     PCDR    =  0050     |     PCFR    =  0055 
+    SACR    =  00C4     |     SADR    =  00C0     |     SALR    =  00C2 
+    SASR    =  00C3     |     SEGSIZE =  0013     |     STACKSEG=  0011 
+    TACR    =  00A4     |     TACSR   =  00A0     |     TAT1R   =  00A3 
+    TAT4R   =  00A9     |   3 getchar    0105 R   |   3 getchar0   0112 R
+  3 hello      00D0 R   |   3 lplp       00CE R   |   3 ml         00C6 R
+  3 ppinit     00DE R   |   3 putchar    00EC R   |   3 putchar0   00ED R
+  3 putchar_   00FB R   |   3 sioinit    00E5 R   |   3 start      0080 R
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (Rabbit 2000/4000)         Page 2
+Hexadecimal [16-Bits]
+
+Area Table
+
+   0 _CODE      size    0   flags    0
+   1 TEST       size    0   flags    8
+   2 TEST0      size    3   flags    8
+   3 TEST1      size   9C   flags    8
+

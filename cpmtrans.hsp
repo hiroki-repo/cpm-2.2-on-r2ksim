@@ -1,0 +1,10 @@
+exist "cpm.img"
+strsize2=strsize
+if strsize2=-1{end}
+sdim cpmbios,0x800
+bload "cpmbios.bin",cpmbios,-1,0xf200
+sdim cpm,strsize2
+bload "cpm.img",cpm
+memcpy cpm,cpmbios,0x800,0x1680,0
+bsave "cpm.img",cpm
+end
